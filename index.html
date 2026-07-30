@@ -45,8 +45,7 @@
   }
 
   .header {
-    padding: 20px 22px 14px;
-    border-bottom: 1px solid var(--border);
+    padding: 20px 22px 12px;
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -62,13 +61,29 @@
   }
   .dot.on { background: var(--accent); }
 
+  .tabs {
+    display: flex; padding: 0 20px; gap: 4px;
+    border-bottom: 1px solid var(--border);
+    flex-shrink: 0;
+  }
+  .tab {
+    padding: 10px 16px; font-size: 13px; font-weight: 600;
+    color: var(--text-muted); border: none; background: none;
+    border-bottom: 2px solid transparent;
+    cursor: pointer; transition: all 0.15s; font-family: inherit;
+  }
+  .tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+
   main { flex: 1; display: flex; flex-direction: column; min-height: 0; }
+
+  .tabc { display: none; flex: 1; flex-direction: column; min-height: 0; }
+  .tabc.active { display: flex; }
 
   .screen {
     display: none;
     flex: 1;
     flex-direction: column;
-    padding: 32px 24px 24px;
+    padding: 28px 24px 24px;
     animation: fadein 0.25s ease;
   }
   .screen.active { display: flex; }
@@ -163,13 +178,58 @@
     font-size: 32px; font-weight: 700; letter-spacing: -0.5px; line-height: 1.4;
   }
   .final-big span { color: var(--accent); }
+
+  /* 카드 탭 */
+  .cards-wrap {
+    flex: 1; overflow-y: auto;
+    padding: 20px 20px 40px;
+    -webkit-overflow-scrolling: touch;
+  }
+  .cards-hint {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px; color: var(--text-dim); letter-spacing: 0.5px;
+    margin-bottom: 14px;
+  }
+  .sit-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    margin-bottom: 10px;
+    overflow: hidden;
+    transition: border-color 0.2s;
+  }
+  .sit-card.open { border-color: var(--accent); }
+  .sit-q {
+    display: flex; align-items: center; gap: 12px;
+    padding: 15px 16px; cursor: pointer;
+  }
+  .sit-num {
+    font-family: 'DM Mono', monospace;
+    width: 26px; height: 26px; border-radius: 50%;
+    background: var(--surface2);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px; font-weight: 700; color: var(--text-muted);
+    flex-shrink: 0;
+  }
+  .sit-card.open .sit-num { background: var(--accent); color: #000; }
+  .sit-q-text { flex: 1; font-size: 15px; font-weight: 500; line-height: 1.5; }
+  .sit-chev { color: var(--text-muted); font-size: 12px; transition: transform 0.15s; flex-shrink: 0; }
+  .sit-card.open .sit-chev { transform: rotate(90deg); color: var(--accent); }
+  .sit-a {
+    display: none;
+    padding: 13px 16px 15px;
+    border-top: 1px solid var(--border);
+    font-size: 17px; font-weight: 500; line-height: 1.6;
+    color: var(--accent);
+  }
+  .sit-card.open .sit-a { display: block; }
 </style>
 </head>
 <body>
 
 <div class="header">
   <div class="header-title">Response <span>Shift</span></div>
-  <div class="dots">
+  <div class="dots" id="dots">
     <div class="dot on" id="d1"></div>
     <div class="dot" id="d2"></div>
     <div class="dot" id="d3"></div>
@@ -177,50 +237,116 @@
   </div>
 </div>
 
+<div class="tabs">
+  <button class="tab active" id="tabbtn-routine" onclick="showTab('routine')">루틴</button>
+  <button class="tab" id="tabbtn-cards" onclick="showTab('cards')">카드</button>
+</div>
+
 <main>
 
-  <section class="screen active" id="s1">
-    <div class="step-label">Step 1 · Pause</div>
-    <div class="step-ghost">01</div>
-    <h1 class="q">내 안에서<br>올라오는 건 뭐지?</h1>
-    <div class="breath-wrap">
-      <div class="breath-circle"><span>숨</span></div>
-      <div class="breath-caption">들이쉬기 4초 · 내쉬기 6초</div>
-    </div>
-    <button class="btn" onclick="go(2)">다음</button>
-  </section>
+  <div class="tabc active" id="tab-routine">
 
-  <section class="screen" id="s2">
-    <div class="step-label">Step 2 · 분리</div>
-    <div class="step-ghost">02</div>
-    <div class="card">
-      <div class="card-label">말</div>
-      <div class="card-text">들은 문장, 그대로.</div>
-    </div>
-    <div class="card">
-      <div class="card-label">의도</div>
-      <div class="card-text hero">사실, 나는 모르지.</div>
-    </div>
-    <div class="spacer"></div>
-    <button class="btn" onclick="go(3)">다음</button>
-  </section>
+    <section class="screen active" id="s1">
+      <div class="step-label">Step 1 · Pause</div>
+      <div class="step-ghost">01</div>
+      <h1 class="q">내 안에서<br>올라오는 건 뭐지?</h1>
+      <div class="breath-wrap">
+        <div class="breath-circle"><span>숨</span></div>
+        <div class="breath-caption">들이쉬기 4초 · 내쉬기 6초</div>
+      </div>
+      <button class="btn" onclick="go(2)">다음</button>
+    </section>
 
-  <section class="screen" id="s3">
-    <div class="step-label">Step 3 · 결과</div>
-    <div class="step-ghost">03</div>
-    <h1 class="q">내가 원하는<br>결과는?</h1>
-    <p class="hint">이기는 것 말고, 얻고 싶은 것.</p>
-    <div class="spacer"></div>
-    <button class="btn" onclick="go(4)">다음</button>
-  </section>
+    <section class="screen" id="s2">
+      <div class="step-label">Step 2 · 분리</div>
+      <div class="step-ghost">02</div>
+      <div class="card">
+        <div class="card-label">말</div>
+        <div class="card-text">들은 문장, 그대로.</div>
+      </div>
+      <div class="card">
+        <div class="card-label">의도</div>
+        <div class="card-text hero">사실, 나는 모르지.</div>
+      </div>
+      <div class="spacer"></div>
+      <button class="btn" onclick="go(3)">다음</button>
+    </section>
 
-  <section class="screen" id="s4">
-    <div class="final">
-      <div class="step-label">Ready</div>
-      <div class="final-big">반응 말고,<br><span>대응.</span></div>
+    <section class="screen" id="s3">
+      <div class="step-label">Step 3 · 결과</div>
+      <div class="step-ghost">03</div>
+      <h1 class="q">내가 원하는<br>결과는?</h1>
+      <p class="hint">이기는 것 말고, 얻고 싶은 것.</p>
+      <div class="spacer"></div>
+      <button class="btn" onclick="go(4)">다음</button>
+    </section>
+
+    <section class="screen" id="s4">
+      <div class="final">
+        <div class="step-label">Ready</div>
+        <div class="final-big">반응 말고,<br><span>대응.</span></div>
+      </div>
+      <button class="btn ghost" onclick="go(1)">처음부터</button>
+    </section>
+
+  </div>
+
+  <div class="tabc" id="tab-cards">
+    <div class="cards-wrap">
+      <div class="cards-hint">상황을 보고, 대응을 먼저 떠올린 다음, 눌러서 확인</div>
+
+      <div class="sit-card" onclick="this.classList.toggle('open')">
+        <div class="sit-q"><div class="sit-num">1</div><div class="sit-q-text">삐져 있는데 "서운했어?" 질문이 왔다</div><div class="sit-chev">▶</div></div>
+        <div class="sit-a">"응, 조금. 큰 건 아니야."</div>
+      </div>
+
+      <div class="sit-card" onclick="this.classList.toggle('open')">
+        <div class="sit-q"><div class="sit-num">2</div><div class="sit-q-text">문자가 날카롭게 느껴진다</div><div class="sit-chev">▶</div></div>
+        <div class="sit-a">단정 말고 확인.<br>"서운하게 들렸는데, 맞아?"</div>
+      </div>
+
+      <div class="sit-card" onclick="this.classList.toggle('open')">
+        <div class="sit-q"><div class="sit-num">3</div><div class="sit-q-text">혼잣말이 시작됐다 (집이든 회사든)</div><div class="sit-chev">▶</div></div>
+        <div class="sit-a">입 말고 다리.<br>자리를 뜬다.</div>
+      </div>
+
+      <div class="sit-card" onclick="this.classList.toggle('open')">
+        <div class="sit-q"><div class="sit-num">4</div><div class="sit-q-text">다 끝내버리고 싶은 충동이 올라온다</div><div class="sit-chev">▶</div></div>
+        <div class="sit-a">"오늘은 여기까지 하자."</div>
+      </div>
+
+      <div class="sit-card" onclick="this.classList.toggle('open')">
+        <div class="sit-q"><div class="sit-num">5</div><div class="sit-q-text">미안해서 다가온다</div><div class="sit-chev">▶</div></div>
+        <div class="sit-a">쳐내지 않는다.<br>"다음에 네가 하고 싶을 때."</div>
+      </div>
+
+      <div class="sit-card" onclick="this.classList.toggle('open')">
+        <div class="sit-q"><div class="sit-num">6</div><div class="sit-q-text">사과·위로가 왔는데 부족하게 느껴진다</div><div class="sit-chev">▶</div></div>
+        <div class="sit-a">따지지 말고 받는다.<br>"응, 그거야. 고마워."</div>
+      </div>
+
+      <div class="sit-card" onclick="this.classList.toggle('open')">
+        <div class="sit-q"><div class="sit-num">7</div><div class="sit-q-text">장난이 현타로 넘어가는 순간</div><div class="sit-chev">▶</div></div>
+        <div class="sit-a">웃으면서 바로.<br>"그만 놀려~ 오늘은 여기까지 ㅋㅋ"</div>
+      </div>
+
+      <div class="sit-card" onclick="this.classList.toggle('open')">
+        <div class="sit-q"><div class="sit-num">8</div><div class="sit-q-text">말이 애매하다 (오라는 건지 말라는 건지)</div><div class="sit-chev">▶</div></div>
+        <div class="sit-a">해독 말고 질문.<br>"와줬으면 좋겠어? 나 가고 싶어."</div>
+      </div>
+
+      <div class="sit-card" onclick="this.classList.toggle('open')">
+        <div class="sit-q"><div class="sit-num">9</div><div class="sit-q-text">작은 짜증 (신호등, 느린 답장, 답답한 메일)</div><div class="sit-chev">▶</div></div>
+        <div class="sit-a">"아, 짜증이네. 에헤이 어쩌겠어."<br>+ 숨 한 번</div>
+      </div>
+
+      <div class="sit-card" onclick="this.classList.toggle('open')">
+        <div class="sit-q"><div class="sit-num">10</div><div class="sit-q-text">상대가 변명만 한다</div><div class="sit-chev">▶</div></div>
+        <div class="sit-a">"의도는 알겠어. 지금은<br>'서운했겠네' 한마디면 돼."</div>
+      </div>
+
     </div>
-    <button class="btn ghost" onclick="go(1)">처음부터</button>
-  </section>
+  </div>
 
 </main>
 
@@ -235,6 +361,18 @@
     }
     window.scrollTo(0, 0);
   }
+
+  function showTab(t) {
+    document.getElementById('tab-routine').classList.toggle('active', t === 'routine');
+    document.getElementById('tab-cards').classList.toggle('active', t === 'cards');
+    document.getElementById('tabbtn-routine').classList.toggle('active', t === 'routine');
+    document.getElementById('tabbtn-cards').classList.toggle('active', t === 'cards');
+    document.getElementById('dots').style.visibility = (t === 'routine') ? 'visible' : 'hidden';
+  }
+
+  // 열 때는 항상 루틴 탭 · 1단계부터 (상태 저장 없음)
+  go(1);
+  showTab('routine');
 
   if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('service-worker.js');
